@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "gy5tbJwqjGKPrQ3WK+i3qOyjzvqEcDWZ4bF51z9iuZM=",
+  "Source": "ExtrosServer",
+  "BasePath": "_content/ExtrosServer",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
