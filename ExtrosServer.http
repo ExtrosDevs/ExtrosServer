@@ -1,0 +1,6 @@
+@ExtrosServer_HostAddress = http://localhost:5270
+
+GET {{ExtrosServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
