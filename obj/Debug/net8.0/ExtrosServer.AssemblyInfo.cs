@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ExtrosServer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ddf6315980569b928fe40f4c0a931f85ff2281e5")]
 [assembly: System.Reflection.AssemblyProductAttribute("ExtrosServer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ExtrosServer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
