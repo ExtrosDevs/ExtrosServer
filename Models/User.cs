@@ -27,9 +27,9 @@ namespace ExtrosServer
         public string Bio { get; set; }
         public int PostalCode { get; set; }
         public bool IsAdmin { get; set; }
-        // RoleId is forignKey for field table
+        // UserFieldId is foreignKey for field table
         // and the UserField is a Object instacne from class User
-        public Guid RoleId { get; set; }
+        public Guid UserFieldId { get; set; }
         public Field UserField { get; set; }
 
         // Navigation properties for the following relationship
