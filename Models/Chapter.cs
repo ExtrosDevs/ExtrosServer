@@ -23,5 +23,9 @@ namespace ExtrosServer.Models
 
         [Required]
         public DateTime CreatedAt { get; set; }
+
+        //navigation properties
+        public Course Course { get; set; }
+
     }
 }
