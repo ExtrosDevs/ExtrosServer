@@ -18,5 +18,9 @@ namespace ExtrosServer.Models
 
         [Required]
         public DateTime EnrollmentDate { get; set; }
+
+        //navigation properties
+        public User User { get; set; }
+        public Course Course { get; set; }
     }
 }
