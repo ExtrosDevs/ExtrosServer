@@ -9,5 +9,9 @@ namespace ExtrosServer.Models
 
         [Required]
         public string CategoryName { get; set; }
+
+        //navigation properties
+        public Course Course { get; set; }
+        public Category Category { get; set; }
     }
 }
