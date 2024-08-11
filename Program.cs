@@ -1,11 +1,18 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using ExtrosServer.Services;
+using DotNetEnv;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+
+
 var key = Encoding.ASCII.GetBytes("your_very_long_and_secure_secret_key_32_bytes");
 
 builder.Services.AddAuthentication(x =>
@@ -28,6 +35,7 @@ builder.Services.AddAuthentication(x =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddTransient<EmailService>();
 
 var app = builder.Build();
 

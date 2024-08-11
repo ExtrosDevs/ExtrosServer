@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using ExtrosServer.Services;
 namespace ExtrosServer.Controllers
 {
     [ApiController]
@@ -12,13 +13,15 @@ namespace ExtrosServer.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IMemoryCache _memoryCache;
+        private readonly EmailService _emailService;
         private readonly TimeSpan _expirationTime = TimeSpan.FromMinutes(5);
         private readonly string _secretKey = "your_very_long_and_secure_secret_key_32_bytes";
 
 
-        public AuthController(IMemoryCache memoryCache)
+        public AuthController(IMemoryCache memoryCache, EmailService emailService)
         {
             _memoryCache = memoryCache;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -28,7 +31,7 @@ namespace ExtrosServer.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] UserRegister model)
+        public async Task<IActionResult> Register([FromBody] UserRegister model)
         {
             if (model == null)
             {
@@ -48,16 +51,21 @@ namespace ExtrosServer.Controllers
                 Password = model.Password,
             };
 
-            // Store the user profile in the cache with expiration
+            // store user profile in cache
             _memoryCache.Set(model.Email, userProfile, _expirationTime);
 
             var verificationCode = new Random().Next(1000, 9999).ToString();
 
-            // Store the verification code in the cache with expiration
+            // store codes in cache
             _memoryCache.Set($"{model.Email}_verificationCode", verificationCode, _expirationTime);
 
-            // Simulate sending the verification code via email
             Console.WriteLine($"Verification code for {model.Email}: {verificationCode}");
+
+            // send verification code
+            var emailSubject = "Your Verification Code | Extros";
+            var emailBody = $"Hello {userProfile.Username}, your verification code is {verificationCode}.";
+            await _emailService.SendEmailAsync(model.Email, emailSubject, emailBody);
+
 
             return Ok("Verification code sent to email.");
         }
