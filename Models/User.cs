@@ -16,11 +16,9 @@ namespace ExtrosServer
         [Required]
         [EmailAddress]
         public string Eamil { get; set; }
-
         public DateTime LastLoginDate { get; set; }
-
         public DateTime CreatedDate { get; set; }
-        public DateOnly BirthDate { get; set; }
+        public DateTime BOD { get; set; }
         public bool Verified { get; set; }
         public int PhoneNumber { get; set; }
         public string UserImage { get; set; }
