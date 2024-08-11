@@ -33,7 +33,7 @@ namespace ExtrosServer
         public Field UserField { get; set; }
 
         // Navigation properties for the following relationship
-        public ICollection<UserFollow> Followers { get; set; }  // Users who follow this user
-        public ICollection<UserFollow> Following { get; set; }  // Users this user is following
+        // public ICollection<UserFollow> Followers { get; set; }  // Users who follow this user
+        // public ICollection<UserFollow> Following { get; set; }  // Users this user is following
     }
 }

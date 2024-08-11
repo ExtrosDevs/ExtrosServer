@@ -1,8 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ExtrosServer
 {
 
     public class Comment
     {
+        [Key]
+
         public Guid CommentID { get; set; }
         public string Content { get; set; }
         public Guid PostID { get; set; } // Foreign Key to Post
