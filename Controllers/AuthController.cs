@@ -63,7 +63,16 @@ namespace ExtrosServer.Controllers
 
             // send verification code
             var emailSubject = "Your Verification Code | Extros";
-            var emailBody = $"Hello {userProfile.Username}, your verification code is {verificationCode}.";
+            var emailBody = $@"
+        <html>
+        <body>
+            <h3>Hello {userProfile.Username},</h3>
+            <p>Thank you for registering with Extros!</p>
+            <p>Your verification code is <strong>{verificationCode}</strong>.</p>
+            <p>Please use this code within {_expirationTime / TimeSpan.FromMinutes(1)} minutes to complete your registration process.</p>
+            <p>Best regards,<br/>The Extros Team</p>
+        </body>
+        </html>";
             await _emailService.SendEmailAsync(model.Email, emailSubject, emailBody);
 
 
@@ -71,7 +80,7 @@ namespace ExtrosServer.Controllers
         }
 
         [HttpPost("activate")]
-        public IActionResult Activate([FromBody] UserActivation model)
+        public async Task<IActionResult> Activate([FromBody] UserActivation model)
         {
             if (model == null)
             {
@@ -90,8 +99,18 @@ namespace ExtrosServer.Controllers
                 {
                     // verification code is correct, remove it from cache
                     _memoryCache.Remove($"{model.Email}_verificationCode");
-
+                    var emailBody = $@"
+        <html>
+        <body>
+            <p>Hello there,</p>
+            <p>Your account has been activated successfully.</p>
+            <p>Welcome to Extros!</p>
+            <p>Best regards,<br/>The Extros Team</p>
+        </body>
+        </html>";
+                    await _emailService.SendEmailAsync(model.Email, "Account Activated Successfully", emailBody);
                     return Ok("Account activated successfully.");
+
                 }
                 else
                 {
