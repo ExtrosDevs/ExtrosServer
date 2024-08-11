@@ -1,8 +1,10 @@
-using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using ExtrosServer.Models;
-
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 namespace ExtrosServer.Controllers
 {
     [ApiController]
@@ -11,6 +13,8 @@ namespace ExtrosServer.Controllers
     {
         private readonly IMemoryCache _memoryCache;
         private readonly TimeSpan _expirationTime = TimeSpan.FromMinutes(5);
+        private readonly string _secretKey = "your_very_long_and_secure_secret_key_32_bytes";
+
 
         public AuthController(IMemoryCache memoryCache)
         {
@@ -89,6 +93,51 @@ namespace ExtrosServer.Controllers
             else
             {
                 return BadRequest("Verification code has expired or is not found.");
+            }
+        }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] UserLogin model)
+        {
+            if (model == null)
+            {
+                return BadRequest("Invalid request body.");
+            }
+
+            if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
+            {
+                return BadRequest("Email and password are required.");
+            }
+
+            if (_memoryCache.TryGetValue(model.Email, out User userProfile))
+            {
+                if (userProfile.Password == model.Password)
+                {
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var key = Encoding.ASCII.GetBytes(_secretKey);
+                    var tokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(new Claim[]
+                        {
+                            new Claim(ClaimTypes.Email, model.Email),
+                            new Claim(ClaimTypes.Name, userProfile.Username)
+                        }),
+                        Expires = DateTime.UtcNow.AddHours(1),
+                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                    };
+                    var token = tokenHandler.CreateToken(tokenDescriptor);
+                    var tokenString = tokenHandler.WriteToken(token);
+
+                    return Ok(new { Token = tokenString });
+                }
+                else
+                {
+                    return BadRequest("Invalid password.");
+                }
+            }
+            else
+            {
+                return BadRequest("User not found.");
             }
         }
     }
