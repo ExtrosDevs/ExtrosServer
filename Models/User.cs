@@ -15,7 +15,7 @@ namespace ExtrosServer
         public string Password { get; set; }
         [Required]
         [EmailAddress]
-        public string Eamil { get; set; }
+        public string Email { get; set; }
 
         public DateTime LastLoginDate { get; set; }
 
