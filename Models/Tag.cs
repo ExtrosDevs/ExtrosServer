@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ExtrosServer
 {
 
@@ -5,7 +7,7 @@ namespace ExtrosServer
     {
         public Guid PostID { get; set; } // Foreign Key to Post
         public Post Post { get; set; } // Navigation Property
-
+        [Key]
         public string TagValue { get; set; }
     }
 }

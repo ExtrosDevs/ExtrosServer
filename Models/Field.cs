@@ -5,6 +5,7 @@ namespace ExtrosServer
     public class Field
     {
         [Required]
+        [Key]
         public Guid Id { get; set; }
         [Range(0, 50)]
         public int Exp { get; set; }
