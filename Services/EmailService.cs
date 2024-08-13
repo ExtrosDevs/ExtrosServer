@@ -18,10 +18,22 @@ namespace ExtrosServer.Services
         public EmailService(IOptions<SmtpSettings> smtpSettings)
         {
             _smtpSettings = smtpSettings.Value;
+            Console.WriteLine($"SMTP Username: {_smtpSettings.Username}");
+
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
+            if (string.IsNullOrEmpty(_smtpSettings.Username))
+            {
+                throw new ArgumentException("SMTP username is not configured.");
+            }
+
+            if (string.IsNullOrEmpty(toEmail))
+            {
+                throw new ArgumentException("Recipient email address cannot be null or empty.");
+            }
+
             using (var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port))
             {
                 client.Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password);
@@ -34,11 +46,13 @@ namespace ExtrosServer.Services
                     Body = body,
                     IsBodyHtml = true
                 };
+
                 mailMessage.To.Add(toEmail);
 
                 await client.SendMailAsync(mailMessage);
             }
         }
+
     }
 
 }
