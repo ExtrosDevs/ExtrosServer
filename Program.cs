@@ -2,6 +2,8 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ExtrosServer.Services;
+using ExtrosServer.Data;
+using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
+
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 
 
@@ -31,6 +34,9 @@ builder.Services.AddAuthentication(x =>
         ValidateAudience = false
     };
 });
+
+builder.Services.AddDbContext<ApplicationDBContext>(options =>
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),  new MySqlServerVersion(new Version(8, 0, 21))));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

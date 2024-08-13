@@ -34,8 +34,6 @@ namespace ExtrosServer
         public Post()
         {
             PostID = Guid.NewGuid();
-            CreatedAt = DateTime.UtcNow;
-            UpdatedAt = DateTime.UtcNow;
         }
     }
 }
