@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using ExtrosServer.Services;
 using ExtrosServer.Data;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,8 +37,7 @@ builder.Services.AddAuthentication(x =>
 });
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),  new MySqlServerVersion(new Version(8, 0, 21))));
-
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<EmailService>();
