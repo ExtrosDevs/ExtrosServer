@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using ExtrosServer.Services;
+using ExtrosServer.Data;
 namespace ExtrosServer.Controllers
 {
     [ApiController]
@@ -14,14 +15,16 @@ namespace ExtrosServer.Controllers
     {
         private readonly IMemoryCache _memoryCache;
         private readonly EmailService _emailService;
+        private readonly ApplicationDBContext _context;
         private readonly TimeSpan _expirationTime = TimeSpan.FromMinutes(5);
         private readonly string _secretKey = "your_very_long_and_secure_secret_key_32_bytes";
 
 
-        public AuthController(IMemoryCache memoryCache, EmailService emailService)
+        public AuthController(IMemoryCache memoryCache, EmailService emailService, ApplicationDBContext context)
         {
             _memoryCache = memoryCache;
             _emailService = emailService;
+            _context = context;
         }
 
         [HttpGet]
@@ -49,6 +52,16 @@ namespace ExtrosServer.Controllers
                 Username = model.Username,
                 Email = model.Email,
                 Password = model.Password,
+                LastLoginDate = DateTime.UtcNow,
+                CreatedDate = DateTime.UtcNow,
+                BOD = DateTime.UtcNow,
+                Verified = false,
+                PhoneNumber = 999,
+                UserImage = "default.png",
+                Bio = "I am a new user",
+                IsAdmin = false,
+                PostalCode = 123456,
+                UserFieldId = null
             };
 
             // store user profile in cache
@@ -97,20 +110,54 @@ namespace ExtrosServer.Controllers
             {
                 if (storedVerificationCode == model.VerificationCode)
                 {
-                    // verification code is correct, remove it from cache
-                    _memoryCache.Remove($"{model.Email}_verificationCode");
-                    var emailBody = $@"
-        <html>
-        <body>
-            <p>Hello there,</p>
-            <p>Your account has been activated successfully.</p>
-            <p>Welcome to Extros!</p>
-            <p>Best regards,<br/>The Extros Team</p>
-        </body>
-        </html>";
-                    await _emailService.SendEmailAsync(model.Email, "Account Activated Successfully", emailBody);
-                    return Ok("Account activated successfully.");
+                    if (_memoryCache.TryGetValue(model.Email, out User userProfile))
+                    {
+                        if (userProfile != null)
+                        {
+                            userProfile.UserFieldId = null;
+                            userProfile.UserField = null;
+                            userProfile.LastLoginDate = DateTime.UtcNow;
+                            Console.WriteLine($"User {userProfile.Email}, {userProfile.Username}, {userProfile.Password}, {userProfile.UserId}.");
 
+                            if (_context != null && _context.Users != null)
+                            {
+                                _context.Users.Add(userProfile);
+                                await _context.SaveChangesAsync();
+
+                                // Remove user from cache after successful database insertion
+                                _memoryCache.Remove(model.Email);
+
+                                // Send activation email
+                                var emailBody = $@"
+                    <html>
+                    <body>
+                        <p>Hello there,</p>
+                        <p>Your account has been activated successfully.</p>
+                        <p>Welcome to Extros!</p>
+                        <p>Best regards,<br/>The Extros Team</p>
+                    </body>
+                    </html>";
+                                // await _emailService.SendEmailAsync(model.Email, "Account Activated Successfully", emailBody);
+
+                                return Ok("Account activated successfully.");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Database context or Users DbSet is null");
+                                return StatusCode(500, "Internal server error: Database context is not properly initialized.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("User profile is null after retrieval from cache");
+                            return BadRequest("User profile not found in cache.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Failed to retrieve user profile from cache");
+                        return BadRequest("User profile not found in cache.");
+                    }
                 }
                 else
                 {
@@ -122,6 +169,7 @@ namespace ExtrosServer.Controllers
                 return BadRequest("Verification code has expired or is not found.");
             }
         }
+
 
         [HttpPost("login")]
         public IActionResult Login([FromBody] UserLogin model)

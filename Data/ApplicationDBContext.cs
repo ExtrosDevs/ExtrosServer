@@ -8,7 +8,7 @@ public class ApplicationDBContext: DbContext{
     public  ApplicationDBContext(DbContextOptions<ApplicationDBContext>  options):base(options){
 
     }
-        public DbSet<User> Users{get;}
+    public DbSet<User> Users{get; set;}
     public DbSet<Comment> Comments{get;}
     public DbSet<Article> Articles{get;}
     public DbSet<Course> Courses{get;}
