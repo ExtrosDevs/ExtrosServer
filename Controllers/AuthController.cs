@@ -61,7 +61,7 @@ namespace ExtrosServer.Controllers
                 Bio = "I am a new user",
                 IsAdmin = false,
                 PostalCode = 123456,
-                UserFieldId = null
+                UserFieldId = null,
             };
 
             // store user profile in cache
