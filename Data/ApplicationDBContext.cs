@@ -14,7 +14,7 @@ public class ApplicationDBContext: DbContext{
     public DbSet<Course> Courses{get;}
     public DbSet<Field> Fields{get;}
     public DbSet<Like> Likes{get;}
-    public DbSet<Post> Posts{get;}
+    public DbSet<Post> Posts{get; set;}
     public DbSet<Tag> Tags{get;}
     public DbSet<UserFollow> UserFollows{get;}
  
