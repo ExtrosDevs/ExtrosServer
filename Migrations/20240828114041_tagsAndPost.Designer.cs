@@ -3,6 +3,7 @@ using System;
 using ExtrosServer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExtrosServer.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240828114041_tagsAndPost")]
+    partial class tagsAndPost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,20 +151,27 @@ namespace ExtrosServer.Migrations
 
             modelBuilder.Entity("ExtrosServer.Models.PostTag", b =>
                 {
+                    b.Property<Guid>("PostTagID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("PostID")
                         .HasColumnType("uuid");
 
                     b.Property<string>("TagValue")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("PostTagID")
-                        .HasColumnType("uuid");
+                    b.Property<string>("TagValue1")
+                        .HasColumnType("text");
 
-                    b.HasKey("PostID", "TagValue");
+                    b.HasKey("PostTagID");
 
-                    b.HasIndex("TagValue");
+                    b.HasIndex("PostID");
 
-                    b.ToTable("PostTags");
+                    b.HasIndex("TagValue1");
+
+                    b.ToTable("PostTag");
                 });
 
             modelBuilder.Entity("ExtrosServer.Models.UserFollow", b =>
@@ -350,16 +360,14 @@ namespace ExtrosServer.Migrations
             modelBuilder.Entity("ExtrosServer.Models.PostTag", b =>
                 {
                     b.HasOne("ExtrosServer.Post", "Post")
-                        .WithMany("PostTags")
+                        .WithMany("Tags")
                         .HasForeignKey("PostID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ExtrosServer.Tag", "Tag")
                         .WithMany("PostTags")
-                        .HasForeignKey("TagValue")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TagValue1");
 
                     b.Navigation("Post");
 
@@ -416,7 +424,7 @@ namespace ExtrosServer.Migrations
 
                     b.Navigation("Likes");
 
-                    b.Navigation("PostTags");
+                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("ExtrosServer.Tag", b =>
