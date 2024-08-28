@@ -1,6 +1,8 @@
 using ExtrosServer;
 using ExtrosServer.Data;
 using ExtrosServer.Models;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,9 +37,9 @@ namespace ExtrosServer.Controllers
             // Fetch posts with related entities
             var posts = await _context.Posts
                 .Include(p => p.Owner)
-                .Include(p => p.Likes)
-                .Include(p => p.Tags)
-                .Include(p => p.Comments)
+                // .Include(p => p.Likes)
+                // .Include(p => p.Tags)
+                // .Include(p => p.Comments)
                 .ToListAsync();
 
             // Return posts
@@ -79,5 +81,21 @@ namespace ExtrosServer.Controllers
             // Return a response
             return Ok(post);
         }
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdatePost(Guid id, [FromBody] JsonPatchDocument<Post> patchDoc)
+        {
+            var post = await _context.Posts.FindAsync(id);
+            if (post == null)
+            {
+                return NotFound("Post not found.");
+            }
+
+            patchDoc.ApplyTo(post);
+            Console.WriteLine(post.Content);
+            await _context.SaveChangesAsync();
+
+            return Ok(post);
+        }
+
     }
 }
