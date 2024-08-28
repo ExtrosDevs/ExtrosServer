@@ -1,13 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using ExtrosServer.Models;
 
 namespace ExtrosServer
 {
 
     public class Tag
     {
-        public Guid PostID { get; set; } // Foreign Key to Post
-        public Post Post { get; set; } // Navigation Property
-        [Key]
+         [Key]
         public string TagValue { get; set; }
+        [JsonIgnore]
+        public ICollection<PostTag> PostTags { get; set; } = new List<PostTag>();
     }
 }

@@ -24,7 +24,7 @@ namespace ExtrosServer
         public string? Media { get; set; }
 
         public ICollection<Like>? Likes { get; set; } = new List<Like>();
-        public ICollection<Tag>? Tags { get; set; } = new List<Tag>();
+        public ICollection<PostTag>? PostTags { get; set; } = new List<PostTag>();
         public ICollection<Comment>? Comments { get; set; } = new List<Comment>();
 
     }
