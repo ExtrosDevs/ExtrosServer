@@ -2,9 +2,9 @@ using ExtrosServer;
 using ExtrosServer.Data;
 using ExtrosServer.Models;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ExtrosServer.Controllers
 {
@@ -27,18 +27,16 @@ namespace ExtrosServer.Controllers
             {
                 return StatusCode(500, "Database context not initialized.");
             }
-
             // Check if there are any posts in the database
             if (!await _context.Posts.AnyAsync())
             {
                 return NotFound("No posts found in the database.");
             }
 
-            // Fetch posts with related entities
             var posts = await _context.Posts
                 .Include(p => p.Owner)
                 // .Include(p => p.Likes)
-                // .Include(p => p.Tags)
+                .Include(p => p.PostTags)
                 // .Include(p => p.Comments)
                 .ToListAsync();
 
@@ -70,7 +68,7 @@ namespace ExtrosServer.Controllers
             post.CreatedAt = DateTime.UtcNow;
             post.UpdatedAt = DateTime.UtcNow;
             post.Likes = new List<Like>();
-            post.Tags = new List<Tag>();
+            post.PostTags = new List<PostTag>();
             post.Comments = new List<Comment>();
 
 
@@ -84,6 +82,7 @@ namespace ExtrosServer.Controllers
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdatePost(Guid id, [FromBody] JsonPatchDocument<Post> patchDoc)
         {
+            // Get instance of Post by id
             var post = await _context.Posts.FindAsync(id);
             if (post == null)
             {
@@ -91,11 +90,43 @@ namespace ExtrosServer.Controllers
             }
 
             patchDoc.ApplyTo(post);
-            Console.WriteLine(post.Content);
             await _context.SaveChangesAsync();
 
             return Ok(post);
         }
-
+        [HttpGet("filter")]
+        public async Task<IActionResult> GetFilterPosts( string tags=null,string title = null, string owner = null, string sortOrder = "date" )
+        {
+            var query = _context.Posts.Include(user => user.Owner).Include(tag => tag.PostTags).AsQueryable();
+            if (!string.IsNullOrEmpty(title))
+            {
+                query = query.Where(p => p.Content.Contains(title));
+            }
+            if (!string.IsNullOrEmpty(owner))
+            {
+                query = query.Where(p => p.Owner.Username.Contains(owner));
+            }
+            if(!string.IsNullOrEmpty(tags)){
+                // var splitedTags = tags.Split("#");
+                var splitedTags = tags.Split(new[] { '#' }, StringSplitOptions.RemoveEmptyEntries)
+                          .Select(t => t.Trim())
+                          .ToList();
+                query = query.Where(p => p.PostTags.Any(t => splitedTags.Contains(t.TagValue)));
+            }
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    query = query.OrderByDescending(s => s.Owner.Username);
+                    break;
+                case "date":
+                    query = query.OrderBy(s => s.CreatedAt);
+                    break;
+                case "date_desc":
+                    query = query.OrderByDescending(s => s.CreatedAt);
+                    break;
+            }
+            var posts = await query.ToListAsync();
+            return Ok(posts);
+        }
     }
 }
